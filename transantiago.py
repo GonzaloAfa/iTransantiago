@@ -2,6 +2,7 @@
 import time, urllib, urllib2, json
 
 url = 'http://www.transantiago.cl/predictor/prediccion?'
+urlLocation = 'http://www.transantiago.cl/restservice/rest/getpuntoparada?'
 
 def getParada(bot, cid, parada):
 
@@ -34,5 +35,32 @@ def getParada(bot, cid, parada):
         print text
         bot.send_message(cid, text)
 
-    elif f.code == 500:
+    elif response.code == 500:
         bot.send_message(cid, 'Tenemos dificultades técnicas... un gatito moridó los cables del servidor')
+
+
+def getLocationParada(bot, cid, lat, lon):
+
+    print urlLocation+'lat='+str(lat)+'&lon='+str(lon)+'&bip=0'
+    req = urllib2.Request(urlLocation+'lat='+str(lat)+'&lon='+str(lon)+'&bip=0')
+    response = urllib2.urlopen(req)
+
+    if response.code == 200:
+
+        for item in json.loads(response.read()):
+
+            if item[u'distancia'] < 0.3:
+
+                print (item[u'name']).encode('utf-8')
+
+                bot.send_message(cid, "Parada "+str(item[u'cod'])+" "+(item[u'name']).encode('utf-8'))
+                bot.send_location(cid, item[u'pos'][0], item[u'pos'][1])
+
+            else:
+                print "La parada "+ str(item[u'cod']) +" está muy lejos"
+
+        bot.send_message(cid, 'Estas son todas las paradas')
+        response.close()
+
+    if response.code == 500:
+        bot.send_message(cid, 'Se cayó el... oh! una ʕ•́ᴥ•̀ʔっ ')

@@ -3,7 +3,7 @@
 import telebot, time, urllib, urllib2, json
 
 from telebot import types # Tipos para la API del bot.
-from transantiago import getParada
+from transantiago import getParada, getLocationParada
 
 try:
     from local_settings import *
@@ -19,6 +19,14 @@ def listener(messages):
 
         if m.content_type == 'text':
             print "[" + str(cid) + "]: " + m.text
+
+        elif m.content_type == 'location':
+            bot.send_message(cid, 'Ubicación recibida con éxito. Estoy obteniendo los paraderos cercanos')
+
+            latitude    = m.location.latitude
+            longitude   = m.location.longitude
+
+            getLocationParada(bot, cid, latitude, longitude)
 
         else:
             print m.content_type
